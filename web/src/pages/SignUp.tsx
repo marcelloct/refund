@@ -3,6 +3,9 @@ import { z, ZodError } from 'zod';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { LinkAccount } from '../components/LinkAccount';
+import { api } from '../services/api';
+import { useNavigate } from 'react-router';
+import { AxiosError } from 'axios';
 
 const signUpSchema = z
   .object({
@@ -23,7 +26,9 @@ export function SignUp() {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  function onSubmit(e: React.SubmitEvent) {
+  const navigate = useNavigate();
+
+  async function onSubmit(e: React.SubmitEvent) {
     e.preventDefault();
     try {
       setIsLoading(true);
@@ -34,9 +39,21 @@ export function SignUp() {
         password,
         passwordConfirm,
       });
+
+      await api.post('/users', data);
+
+      if (confirm('Successfully Registered. Go to Home Page?')) {
+        navigate('/');
+      }
     } catch (error) {
+      console.log(error);
+
       if (error instanceof ZodError) {
         return alert(error.issues[0].message);
+      }
+
+      if (error instanceof AxiosError) {
+        return alert(error.response?.data.message);
       }
       alert('Unable to register');
     } finally {
