@@ -1,28 +1,74 @@
+import { AxiosError } from 'axios';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
+import { z, ZodError } from 'zod';
 import fileSvg from '../assets/file.svg';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Select } from '../components/Select';
 import { Upload } from '../components/Upload';
+import { api } from '../services/api';
 import { CATEGORIES, CATEGORIES_KEYS } from '../utils/categories';
+
+const refundSchema = z.object({
+  name: z.string().min(3, { error: 'Name must have at least 3 characters ' }),
+  category: z.enum(CATEGORIES_KEYS),
+  amount: z.coerce
+    .number({ error: 'Inform a valid value' })
+    .positive({ error: 'Inform a valid value higher than 0' }),
+});
 
 export function Refund() {
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [filename, setFilename] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(null);
 
   const navigate = useNavigate();
   const params = useParams<{ id: string }>();
 
-  function onSubmit(e: React.SubmitEvent) {
+  async function onSubmit(e: React.SubmitEvent) {
     e.preventDefault();
 
     if (params.id) return navigate(-1);
 
-    navigate('/confirm', { state: { fromSubmit: true } });
+    try {
+      setIsLoading(true);
+
+      if (!file) {
+        alert('Receipt image is required');
+      }
+
+      const fileUploadForm = new FormData();
+      fileUploadForm.append('file', file as Blob); // 'file' field is set in api upload configs
+
+      const response = await api.post('/uploads', fileUploadForm);
+
+      const data = refundSchema.parse({
+        name,
+        category,
+        amount: amount.replace(',', '.'),
+      });
+      //console.log(data);
+
+      await api.post('/refunds', {
+        ...data,
+        filename: response.data.filename,
+      });
+
+      navigate('/confirm', { state: { fromSubmit: true } });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return alert(error.issues[0].message);
+      }
+      if (error instanceof AxiosError) {
+        return alert(error.response?.data.message);
+      }
+      return alert('Failed to make a new solicitation');
+    } finally {
+      setIsLoading(false);
+    }
   }
   return (
     <form
@@ -79,8 +125,8 @@ export function Refund() {
         </a>
       ) : (
         <Upload
-          filename={filename && filename.name}
-          onChange={(e) => e.target.files && setFilename(e.target.files[0])}
+          filename={file && file.name}
+          onChange={(e) => e.target.files && setFile(e.target.files[0])}
         />
       )}
 
