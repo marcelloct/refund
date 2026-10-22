@@ -4,6 +4,7 @@ import { z, ZodError } from 'zod';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { LinkAccount } from '../components/LinkAccount';
+import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
 
 const signInSchema = z.object({
@@ -17,6 +18,8 @@ export function SignIn() {
   // isLoading is true while async function (signIn) is pending, after is false
   const [state, formAction, isLoading] = useActionState(signIn, null); // First parameter it's the function to be executed, the second one is the initial 'state' value(s)
 
+  const auth = useAuth();
+
   // first parameter is the 'state' previous state (not used in this case)
   // second parameter get the data from form based on name parameter
   async function signIn(_: any, formData: FormData) {
@@ -27,7 +30,8 @@ export function SignIn() {
       });
 
       const response = await api.post('/sessions', data);
-      //console.log(response.data);
+      auth.save(response.data);
+      // console.log(response.data);
     } catch (error) {
       console.log(error);
 
