@@ -9,7 +9,10 @@ export function Header() {
       <img src={logo} alt="logo" className="my-8" />
       <div className="flex items-center gap-3">
         <span className="text-sm font-semibold text-customGray-200">
-          Welcome, {auth.session?.user.name}
+          Welcome,{' '}
+          <span className="font-bold capitalize">
+            {auth.session?.user.name}
+          </span>
         </span>
         <img
           src={logout}
