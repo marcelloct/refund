@@ -1,11 +1,11 @@
+import { AxiosError } from 'axios';
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { z, ZodError } from 'zod';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { LinkAccount } from '../components/LinkAccount';
 import { api } from '../services/api';
-import { useNavigate } from 'react-router';
-import { AxiosError } from 'axios';
 
 const signUpSchema = z
   .object({
@@ -34,7 +34,7 @@ export function SignUp() {
       setIsLoading(true);
 
       const data = signUpSchema.parse({
-        name,
+        name: name.toLowerCase(),
         email,
         password,
         passwordConfirm,
@@ -48,10 +48,12 @@ export function SignUp() {
     } catch (error) {
       console.log(error);
 
+      // Validation Error from Front End
       if (error instanceof ZodError) {
         return alert(error.issues[0].message);
       }
 
+      // API error
       if (error instanceof AxiosError) {
         return alert(error.response?.data.message);
       }
