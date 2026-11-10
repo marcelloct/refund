@@ -1,8 +1,11 @@
+import { classMerge } from '../utils/classMerge';
+
 export type RefundItemProps = {
   id: string;
   name: string;
   description: string;
   amount: string;
+  status: string;
   categoryImg: string;
 };
 
@@ -24,6 +27,18 @@ export function RefundItem({ data, ...rest }: Props) {
         </strong>
         <span className="text-xs text-customGray-200 capitalize">
           {data.description}
+        </span>
+      </div>
+
+      <div className="flex flex-1 justify-center">
+        <span
+          className={classMerge([
+            'inline-block bg-gray-200 text-sm rounded-md px-3 py-[4px]',
+            data.status === 'rejected' && 'bg-red-200 text-red-800',
+            data.status === 'approved' && 'bg-green-200 text-green-800',
+          ])}
+        >
+          {data.status}
         </span>
       </div>
 

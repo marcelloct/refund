@@ -12,6 +12,12 @@ enum UserRole {
   manager
 }
 
+enum RefundStatus {
+  pending
+  approved
+  rejected
+}
+
 enum Category {
   food
   services
@@ -41,6 +47,7 @@ model Refunds {
   name String
   amount Float
   category Category
+  status RefundStatus @default(pending)
   filename String
 
   userId String @map("user_id")

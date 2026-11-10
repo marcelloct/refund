@@ -36,6 +36,7 @@ export function Dashboard() {
           id: refund.id,
           name: refund.user.name,
           description: refund.name,
+          status: refund.status,
           amount: formatCurrency(refund.amount),
           categoryImg: CATEGORIES[refund.category].icon,
         }))
