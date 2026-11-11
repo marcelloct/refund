@@ -9,6 +9,7 @@ import { Select } from '../components/Select';
 import { Upload } from '../components/Upload';
 import { api } from '../services/api';
 import { CATEGORIES, CATEGORIES_KEYS } from '../utils/categories';
+import { classMerge } from '../utils/classMerge';
 import { formatCurrency } from '../utils/formatCurrency';
 
 const refundSchema = z.object({
@@ -23,6 +24,8 @@ export function Refund() {
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
+  const [status, setStatus] = useState('pending');
+  const [prevStatus, setPrevStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [fileURL, setFileURL] = useState<string | null>(null);
@@ -78,8 +81,33 @@ export function Refund() {
       const { data } = await api.get<RefundAPIResponse>(`/refunds/${id}`);
       setName(data.name);
       setCategory(data.category);
+      setStatus(data.status);
+      setPrevStatus(data.status);
       setAmount(formatCurrency(data.amount));
       setFileURL(data.filename);
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return alert(error.response?.data.message);
+      }
+      alert('Unable to fetch data');
+    }
+  }
+
+  async function updateStatus(e: React.MouseEventHandler<HTMLButtonElement>) {
+    e.preventDefault();
+    try {
+      if (params.id) {
+        const { data } = await api.get<RefundAPIResponse>(
+          `/refunds/${params.id}`
+        );
+        await api.patch(`/refunds/${params.id}`, {
+          ...data,
+          status,
+        });
+
+        alert('Status updated successfully');
+        setPrevStatus(status);
+      }
     } catch (error) {
       if (error instanceof AxiosError) {
         return alert(error.response?.data.message);
@@ -106,6 +134,20 @@ export function Refund() {
         <p className="text-sm text-customGray-200 mt-2 mb-4">
           Expense details for requesting refund
         </p>
+        {!!params.id && (
+          <p className="p-4 bg-gray-100 rounded-md ">
+            This solicitation is:
+            <span
+              className={classMerge([
+                'inline-block bg-gray-200 text-sm rounded-sm px-3 py-[4px] ml-2',
+                prevStatus === 'rejected' && 'bg-red-200 text-red-800',
+                prevStatus === 'approved' && 'bg-green-200 text-green-800',
+              ])}
+            >
+              {prevStatus}
+            </span>
+          </p>
+        )}
       </header>
       <Input
         required
@@ -152,6 +194,35 @@ export function Refund() {
           filename={file && file.name}
           onChange={(e) => e.target.files && setFile(e.target.files[0])}
         />
+      )}
+
+      {!!params.id && (
+        <div className="flex gap-4 items-end">
+          <Select
+            required
+            legend="Status"
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <option key="1" value="pending" defaultChecked>
+              Pending
+            </option>
+            <option key="2" value="approved">
+              Approved
+            </option>
+            <option key="3" value="rejected">
+              Rejected
+            </option>
+          </Select>
+
+          <Button
+            className="px-3 "
+            type="submit"
+            onClick={updateStatus}
+            isLoading={isLoading}
+          >
+            Update
+          </Button>
+        </div>
       )}
 
       <Button type="submit" isLoading={isLoading}>
