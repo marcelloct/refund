@@ -105,6 +105,8 @@ export function Refund() {
           status,
         });
 
+        if (status === 'pending') return alert('Select an status to update');
+
         alert('Status updated successfully');
         setPrevStatus(status);
       }
@@ -196,7 +198,7 @@ export function Refund() {
         />
       )}
 
-      {!!params.id && (
+      {!!params.id && prevStatus === 'pending' && (
         <div className="flex gap-4 items-end">
           <Select
             required
@@ -204,7 +206,7 @@ export function Refund() {
             onChange={(e) => setStatus(e.target.value)}
           >
             <option key="1" value="pending" defaultChecked>
-              Pending
+              Select a status
             </option>
             <option key="2" value="approved">
               Approved
