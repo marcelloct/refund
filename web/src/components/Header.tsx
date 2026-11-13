@@ -9,6 +9,11 @@ export function Header() {
       <img src={logo} alt="logo" className="my-8" />
       <div className="flex items-center gap-3">
         <span className="text-sm font-semibold text-customGray-200">
+          {auth.session?.user.role === 'employee' && (
+            <a href={`/refunds`} className="mr-6 underline underline-offset-4">
+              My Refunds
+            </a>
+          )}
           Welcome,{' '}
           <span className="font-bold capitalize">
             {auth.session?.user.name}

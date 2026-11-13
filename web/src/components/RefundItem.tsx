@@ -2,7 +2,7 @@ import { classMerge } from '../utils/classMerge';
 
 export type RefundItemProps = {
   id: string;
-  name: string;
+  name?: string;
   description: string;
   amount: string;
   status: string;

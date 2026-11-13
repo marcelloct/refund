@@ -19,3 +19,7 @@ type RefundsPaginationAPIResponse = {
     totalPages: number;
   };
 };
+
+type UserRefundsAPIResponse = {
+  refunds: RefundAPIResponse[];
+};

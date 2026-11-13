@@ -30,7 +30,7 @@ export function Dashboard() {
       const response = await api.get<RefundsPaginationAPIResponse>(
         `/refunds?name=${name}&page=${page}&perPage=${PER_PAGE}`
       );
-      console.log(response.data);
+      //console.log(response.data);
       setRefunds(
         response.data.refunds.map((refund) => ({
           id: refund.id,
